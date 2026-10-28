@@ -1,0 +1,48 @@
+{
+  "summary": "Iteration 1 covered the full backend API and the main mobile flows at 390x844 (Studio, Track editor, Perform, Projects, ALS inspector, AI, Arrange). Backend: 66/66 pass after 2 small fixes by the tester (62 public-URL API tests in tests/test_api_daw.py plus the existing tests/test_engine.py). Bug 1: beat repeat crashed with a 500 shape mismatch at tempos where a bar has an odd sample count, e.g. 132 BPM (that is the default Berghain tempo, so RPT 1/4 had no audio there). Bug 2: a non-numeric op value such as a step index returned 500 instead of 400. Claude explain works (claude-sonnet-5-5 returns text). ALS demo, import, no-op compile, patch compile and gzip download all work. Frontend: every requested flow works end to end and changes the backend project (each action bumps the revision as expected). Remaining frontend problems: 'SCENE undefined' in the transport after recording a performance, overlapping labels on the XY pad, the BPM slider overlapping the key chips on the New Project screen, and the transport header clipping the export icon on the right. No deprecated Expo packages found (expo-audio is used, not expo-av). No SafeAreaView issues found.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "GET /api/projects/{id}/render.wav?repeat=4|8|16|32", "issue": "FIXED BY TESTER: the beat_repeat function in engine/dsp.py raised ValueError (could not broadcast (2,40090) into (2,40091)) when the bar length in samples was odd, e.g. 132 BPM. The repeat count was based on bar//2 instead of the remaining length (bar - bar//2). The backend log showed repeated 500s from the Perform tab when RPT 1/4 was active.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "POST /api/projects/{id}/ops", "issue": "FIXED BY TESTER: a ValueError, e.g. int('abc') for a step index or section, was not caught by apply_ops and returned 500. It now returns 400."},
+      {"endpoint": "GET /api/projects/{id}/render.wav?mode=section&section=N", "issue": "An out-of-range section index (also bad track or mask values) silently falls back to the loop render with a 200 response instead of returning 400."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Transport mode label after recording a performance", "issue": "After REC, then scene launches, then REC off, RecordPerformance replaces the sections (6 become 2), but perf.section keeps the last launched index. The transport then shows 'SCENE undefined' and keeps requesting mode=section&section=2, which the backend silently renders as a loop. Reference: src/components/Transport.tsx:70, app/(tabs)/perform.tsx:93-99", "testID": "transport-mode", "priority": "MEDIUM"},
+      {"component": "XY pad labels", "issue": "The xy-display text overlaps the 'X CUTOFF · Y DRIVE' label at the top-left, so both are unreadable. The style override [st.xyLabel, {bottom:4, top: undefined}] does not clear top on web. Use a separate style or top:'auto'. Reference: app/(tabs)/perform.tsx:41-42", "testID": "xy-display", "priority": "MEDIUM"},
+      {"component": "New Project BPM slider", "issue": "The new-bpm slider (y 258-286) overlaps the key chip row (y 265-301) by about 21px, so the bar is drawn over the C/C#/D chips. Reference: app/new.tsx:71-72", "testID": "new-bpm", "priority": "LOW"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Transport header (all tabs)", "issues": ["At 390px wide the export/share icon on the right is clipped when the seed has 5 digits (e.g. 96883) or the Perform scene label is longer. The header row does not shrink or wrap."]},
+      {"screen": "Studio step grid", "issues": ["Step cells are 22x36px and bpm-up/bpm-down are 24x44px, below the 44x44 touch-target minimum. This is acceptable for a dense 16-step grid, but consider a larger hitSlop."]},
+      {"screen": "Perform", "issues": ["The default XY puck sits at x=1,y=0, half clipped in the bottom-right corner of the pad."]}
+    ],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_api_daw.py", "/app/backend/tests/test_engine.py", "/app/test_reports/pytest/pytest_results.xml"],
+  "action_items": [
+    "Reset or clamp e.perf.section (set it to null or a valid index) after RecordPerformance replaces the sections. Also guard Transport.tsx:70 against a missing section.",
+    "Fix the overlapping XY pad labels (perform.tsx:42): use a dedicated bottom-anchored style instead of top: undefined.",
+    "Fix the BPM slider overlapping the key chips in app/new.tsx (add spacing, or check the ParamSlider height and margin inside Panel).",
+    "Make the Transport header fit at 390px: let the BPM/seed blocks shrink, or truncate the seed so the export icon is not clipped.",
+    "Optional: return 400 for an out-of-range section, track or mask in render.wav and render/stats.",
+    "Review the 2 backend fixes made by the tester (dsp.py beat_repeat, server.py apply_ops ValueError handling)."
+  ],
+  "critical_code_review_comments": [
+    "dsp.beat_repeat: an off-by-one on odd bar lengths caused a BPM-dependent 500 (fixed). The 16 combinations of 4 BPMs x 4 repeat values are now regression-tested.",
+    "apply_ops only caught KeyError and TypeError. ValueError from int() casts surfaced as 500 (fixed).",
+    "render_wav and render_stats do not validate section, track or mask, and silently fall back to other output.",
+    "The planner and Claude explain are correctly gated by consent (400 without consent). Explanations are cached in the db."
+  ],
+  "updated_files": ["/app/backend/engine/dsp.py", "/app/backend/server.py", "/app/backend/tests/test_api_daw.py"],
+  "success_rate": {"backend": "100% after tester fixes (64/66 before: beat-repeat 500, ValueError 500)", "frontend": "~90% (all flows functional; 3 UI bugs + header clipping)"},
+  "seed_data_creation": "Test projects are named TEST_* and deleted by the tests. UI runs created several 'Berghain/Tresor/Detroit' projects and ALS demo sets, which are left in the db.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "No auth. The public URL is in frontend/.env as EXPO_PUBLIC_BACKEND_URL (there is no EXPO_BACKEND_URL key). The test file reads either variable. A fresh browser has no current project, so create one via studio-new-project, then new-create-button. Step grid testIDs are grid-<trackId>-step-<i> in Studio and editor-grid-step-<i> in the editor. Track ids are trk_kick, trk_rumble, trk_perc, trk_hats, trk_stabs. Kick humanize is hidden by design (grid-locked). Sliders are drag bars that commit on mouseup. Tabs are tab-studio, tab-perform, tab-projects, tab-ai.",
+  "rca_of_issue": "Beat repeat 500: bar = int(16*sd*sr) can be odd. The target slice out[:, h:b+bar] has length bar - bar//2, but reps*sl was computed from bar//2, so the tile could be 1 sample short. Repro: set the project to 132 BPM, then GET render.wav?mode=section&section=0&repeat=4, which returned 500. Mitigation: reps = ceil((b+bar-h)/sl). Verified 200 for BPM 128/131/132/137 with repeat 4/8/16/32."
+}

@@ -1,0 +1,143 @@
+{
+  "app_name": "PARAMETRIC ALS — AI Techno DAW Engine",
+  "personality": "7 Dark-First Utility DARK (Industrial DAW Customization)",
+  "personality_one_liner": "A precision-focused, dark-mode industrial DAW engine prioritizing dense data readability, procedural techno workflows, and zero-friction transport controls over decorative UI.",
+  "color": {
+    "surface": "#0B0D10",
+    "onSurface": "#E6E8EB",
+    "surfaceSecondary": "#12161B",
+    "onSurfaceSecondary": "#E6E8EB",
+    "surfaceTertiary": "#181D23",
+    "onSurfaceTertiary": "#E6E8EB",
+    "surfaceInverse": "#202630",
+    "onSurfaceInverse": "#E6E8EB",
+    "brand": "#F59E0B",
+    "brandPrimary": "#F59E0B",
+    "onBrandPrimary": "#0B0D10",
+    "brandSecondary": "#06B6D4",
+    "onBrandSecondary": "#0B0D10",
+    "brandTertiary": "#2A3038",
+    "onBrandTertiary": "#E6E8EB",
+    "success": "#22C55E",
+    "onSuccess": "#0B0D10",
+    "warning": "#F59E0B",
+    "onWarning": "#0B0D10",
+    "error": "#EF4444",
+    "onError": "#0B0D10",
+    "info": "#06B6D4",
+    "onInfo": "#0B0D10",
+    "border": "#2A3038",
+    "borderStrong": "#8C949F",
+    "divider": "#2A3038",
+    "muted": "#8C949F",
+    "onBrand": "#0B0D10"
+  },
+  "typography": {
+    "displayFontFamily": "JetBrains Mono",
+    "textFontFamily": "Inter",
+    "scale": {
+      "sm": 10,
+      "base": 12,
+      "lg": 14,
+      "xl": 16,
+      "2xl": 20
+    }
+  },
+  "spacing": {
+    "rule": "Industrial dense UI requires ultra-tight spacing. Use padding for grouping, but keep margins minimal. Avoid excessive whitespace.",
+    "xs": 2,
+    "sm": 4,
+    "md": 8,
+    "lg": 12,
+    "xl": 16,
+    "2xl": 24,
+    "3xl": 32
+  },
+  "radius_tokens": {
+    "sm": 2,
+    "md": 4,
+    "lg": 8,
+    "pill": 999
+  },
+  "shadow_tier": "0",
+  "navigation": "bottom_tabs",
+  "icon_set": "MaterialCommunityIcons",
+  "glassmorphism": {
+    "enabled": false,
+    "do's": [
+      "Use solid surface colors with precise 1px borders to separate panels."
+    ],
+    "dont's": [
+      "Do not use blur, glass, or gradients. The user specifically requested original industrial studio aesthetic with crisp outlines."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "solid surfaceSecondary",
+      "android": "solid surfaceSecondary",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "none",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Studio",
+      "purpose": "Primary workspace for sequencing, track grouping, and layer generation.",
+      "states": {
+        "loading": "Dark spinner with 'Initializing Audio Engine...' mono text.",
+        "empty": "No tracks initialized. Prompt to 'Load Template' or 'Add Generator'.",
+        "error": "Audio context failed. 'Reset Engine' action."
+      },
+      "layout": "Global transport bar fixed at top (Play, Stop, BPM, Key, Seed). Below it, a vertical track list. Each track row has a step sequencer grid (horizontal scroll if needed) and Mute/Solo toggles. Tapping a track expands its generator controls (Rumble Sub, 909 Hats, etc.) in a dense, multi-column parameters panel using surfaceTertiary."
+    },
+    {
+      "name": "Perform",
+      "purpose": "Live performance surface with pads, macros, and XY controls.",
+      "states": {
+        "loading": "Skeleton grid of pads.",
+        "empty": "No performance template active.",
+        "error": "MIDI routing error."
+      },
+      "layout": "Split layout. Top half: 4x4 Pad performance grid with Scene launch buttons on the right edge. Bottom half: XY morph pad on the left, 8 Macro knobs (slider/rotary representations) on the right. Beat repeat and snapshot triggers integrated as small utility buttons above the pads."
+    },
+    {
+      "name": "Projects",
+      "purpose": "ALS file management, import, and project diagnostics.",
+      "states": {
+        "loading": "Parsing ALS XML structure...",
+        "empty": "No projects imported. Show 'Import .als' primary button.",
+        "error": "Invalid ALS format."
+      },
+      "layout": "File browser list. On selection, splits to show a Track Tree and Sidechain Graph (visual node representation or dense list). Invariants/diagnostics shown in a monospace log-style terminal panel at the bottom."
+    },
+    {
+      "name": "AI Engine",
+      "purpose": "Rule-based AI suggestions and Claude explanation plans.",
+      "states": {
+        "loading": "Generating techno completion plan...",
+        "empty": "No context. 'Analyze Project' to generate suggestions.",
+        "error": "AI context limit reached."
+      },
+      "layout": "Terminal-style feed. Suggestion cards in surfaceSecondary. Each card has a mono-spaced header, a Claude explanation paragraph, and a row of dense action buttons (Preview, Apply, Undo, Manual Steps) in brandSecondary or surfaceInverse."
+    }
+  ],
+  "images": {
+    "splash_logo": {
+      "url": "https://images.unsplash.com/photo-1605170876472-db58e15c430e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2ODl8MHwxfHNlYXJjaHwxfHxkYXJrJTIwbWluaW1hbCUyMGluZHVzdHJpYWwlMjBlbGVjdHJvbmljJTIwbXVzaWMlMjBnZWFyfGVufDB8fHx8MTc5MzE1NDAyNHww&ixlib=rb-4.1.0&q=85",
+      "alt": "Dark minimalist industrial audio equipment"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Follow the Dark-First Utility DARK rules. The app must feel like a professional piece of audio software (like Ableton or Elektron Elektron boxes), not a consumer social app.",
+    "Use strict, precise 1px borders (`border` token #2A3038) for all panel separations. No shadows, no glassmorphism.",
+    "Typography is critical: Use JetBrains Mono (or a similar monospace font available in Expo like Space Mono) for ALL numerical values, BPM, timers, step sequence labels, and AI headers. Use Inter/Satoshi only for body text/paragraphs.",
+    "All interactive elements (knobs, sliders, step grids) should be represented with functional, minimal geometry (rectangles, crisp lines) rather than skeuomorphic fake knobs. A 'knob' can be a vertical/horizontal bar or a minimal arc.",
+    "Maintain the provided color tokens perfectly. Main background #0B0D10, primary UI accents in Amber #F59E0B and Cyan #06B6D4.",
+    "The Transport Bar (Play/Stop, BPM, Key, Seed) must be persistent at the top of the 'Studio' and 'Perform' screens, identical to desktop DAWs.",
+    "Scale down standard React Native spacings. This UI is dense. Use `xs` (2) and `sm` (4) for internal component spacing, `md` (8) for panel gaps."
+  ]
+}
